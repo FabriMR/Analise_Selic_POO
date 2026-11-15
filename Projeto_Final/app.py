@@ -1,30 +1,3 @@
-"""
-================================================================================
-PROJETO FINAL - PROGRAMAÇÃO ORIENTADA A OBJETOS (CDIA)
-Sistema de Análise de Dados e Dashboard Interativo: Taxa Selic Acumulada no Mês
-================================================================================
-Fonte de Dados Pública (Economia - Banco Central do Brasil):
-- Portal de Dados Abertos BCB (Série SGS 4390):
-  https://dadosabertos.bcb.gov.br/dataset/4390-taxa-de-juros---selic-acumulada-no-mes
-- Endpoint JSON da API SGS/BCB:
-  https://api.bcb.gov.br/dados/serie/bcdata.sgs.4390/dados?formato=json
-- Endpoint CSV da API SGS/BCB:
-  https://api.bcb.gov.br/dados/serie/bcdata.sgs.4390/dados?formato=csv
-
-Arquitetura Orientada a Objetos e Princípios SOLID aplicados:
-1. FonteDados (ABC) -> FonteDadosBCB (Herança e Polimorfismo / OCP e DIP)
-2. AnalisadorSelic (Responsabilidade Única de ETL e análise Pandas / SRP)
-3. Indicador (ABC) -> IndicadorEstatistico e IndicadorFinanceiro (Herança e Polimorfismo / LSP e OCP)
-4. VisualizadorSelic (Geração de gráficos interativos Plotly / SRP)
-5. DashboardSelic (Orquestração da interface web Streamlit com injeção de dependência / DIP)
-
-Como executar o Dashboard:
-    streamlit run app.py
-
-Como executar a suíte de validação e testes:
-    python app.py --test
-================================================================================
-"""
 
 from __future__ import annotations
 
