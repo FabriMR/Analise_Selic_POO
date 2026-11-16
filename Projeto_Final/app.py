@@ -14,7 +14,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-# Importações condicionais para permitir testes automatizados mesmo em ambientes sem UI
 try:
     import plotly.express as px
     import plotly.graph_objects as go
@@ -32,11 +31,6 @@ except ImportError:
     STREAMLIT_DISPONIVEL = False
 
 
-# ==============================================================================
-# DADOS HISTÓRICOS OFICIAIS DE CONTINGÊNCIA (SÉRIE SGS 4390 - BCB: 1995 A OUT/2026)
-# Caso a API do Banco Central esteja temporariamente indisponível ou sem rede,
-# o sistema mantém resiliência carregando a série oficial verificada do SGS 4390.
-# ==============================================================================
 HISTORICO_OFICIAL_SGS_4390: Dict[int, List[float]] = {
     1995: [3.37, 3.25, 4.26, 4.26, 4.25, 4.04, 4.02, 3.84, 3.32, 3.09, 2.88, 2.78],
     1996: [2.58, 2.35, 2.22, 2.07, 2.01, 1.98, 1.93, 1.97, 1.90, 1.86, 1.80, 1.80],
@@ -72,10 +66,6 @@ HISTORICO_OFICIAL_SGS_4390: Dict[int, List[float]] = {
     2026: [1.16, 1.00, 1.21, 1.09, 1.07, 1.12, 1.22, 1.09, 1.08, 1.07],
 }
 
-
-# ==============================================================================
-# ETAPA 3 - MODELAGEM ORIENTADA A OBJETOS (CLASSES, HERANÇA, POLIMORFISMO, SOLID)
-# ==============================================================================
 
 class FonteDados(ABC):
     """
@@ -161,7 +151,6 @@ class FonteDadosBCB(FonteDados):
         """
         self._ultima_extracao = datetime.now()
 
-        # 1. Tentativa via API oficial do Banco Central (janelas de 10 anos)
         try:
             registros_api: List[Dict[str, str]] = []
             janelas = [
@@ -185,7 +174,6 @@ class FonteDadosBCB(FonteDados):
         except Exception:
             pass
 
-        # 2. Tentativa via arquivo CSV local (caso já exista no diretório do projeto)
         if self.__caminho_csv_local and Path(self.__caminho_csv_local).exists():
             try:
                 df_csv = pd.read_csv(self.__caminho_csv_local, sep=";", decimal=",")
@@ -195,7 +183,6 @@ class FonteDadosBCB(FonteDados):
             except Exception:
                 pass
 
-        # 3. Fallback resiliente com os dados históricos oficiais da Série 4390
         self._modo_extracao = "Base Histórica Oficial Integrada (SGS 4390 - BCB)"
         return self._construir_dataframe_oficial_contingencia()
 
@@ -374,12 +361,10 @@ class AnalisadorSelic:
         df = self.__df_bruto.copy()
         total_inicial = len(df)
 
-        # Padronização dos nomes das colunas
         df.columns = [str(c).strip().lower() for c in df.columns]
         if "data" not in df.columns or "valor" not in df.columns:
             raise KeyError("O dataset deve conter as colunas 'data' e 'valor'.")
 
-        # Conversão de tipos (data para datetime e valor para float)
         df["data"] = pd.to_datetime(df["data"], format="%d/%m/%Y", errors="coerce")
         df["taxa_mensal"] = (
             df["valor"]
@@ -388,11 +373,9 @@ class AnalisadorSelic:
             .pipe(pd.to_numeric, errors="coerce")
         )
 
-        # Contabilização de valores ausentes/inconsistentes antes do tratamento
         valores_ausentes = int(df["data"].isna().sum() + df["taxa_mensal"].isna().sum())
         inconsistencias_negativas = int((df["taxa_mensal"] < 0).sum())
 
-        # Tratamento de dados ausentes e inconsistências
         df = df.dropna(subset=["data", "taxa_mensal"]).copy()
         df = df[df["taxa_mensal"] >= 0].copy()
 
@@ -681,9 +664,6 @@ class AnalisadorSelic:
         ]
 
 
-# ==============================================================================
-# ETAPA 5 - DESENVOLVIMENTO DAS VISUALIZAÇÕES INTERATIVAS (PLOTLY)
-# ==============================================================================
 
 class VisualizadorSelic:
     """
@@ -847,9 +827,6 @@ class VisualizadorSelic:
         return fig
 
 
-# ==============================================================================
-# ETAPA 6 - DESENVOLVIMENTO DO DASHBOARD DINÂMICO (STREAMLIT)
-# ==============================================================================
 
 class DashboardSelic:
     """
@@ -1069,9 +1046,6 @@ class DashboardSelic:
         )
 
 
-# ==============================================================================
-# ETAPA 7 - INTEGRAÇÃO, GERAÇÃO DO CSV OFICIAL E TESTES AUTOMATIZADOS DO SISTEMA
-# ==============================================================================
 
 def exportar_csv_local(caminho_destino: str = "selic_sgs_4390.csv") -> Path:
     """
@@ -1151,9 +1125,6 @@ def executar_suite_validacao() -> None:
     print("=" * 78)
 
 
-# ==============================================================================
-# PONTO DE ENTRADA DA APLICAÇÃO
-# ==============================================================================
 
 def main() -> None:
     if "--test" in sys.argv:
